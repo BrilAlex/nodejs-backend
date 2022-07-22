@@ -1,39 +1,23 @@
-let http = require("http");
-let {usersController} = require("./usersController");
+const express = require("express");
+const cors = require("cors");
+const users = require("./usersRouter");
+const bodyParser = require("body-parser");
 
-process.on("unhandledRejection", function(reason, p){
-    console.log(reason, p);
+const app = express();
+
+app.use(cors());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+app.use("/users", users);
+
+app.get("/tasks", async (request, response) => {
+    response.send("Tasks page");
 });
 
-let cors = (request, response) => {
-    // Set CORS headers
-    response.setHeader("Access-Control-Allow-Origin", "*");
-    response.setHeader("Access-Control-Request-Method", "*");
-    response.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET");
-    response.setHeader("Access-Control-Allow-Headers", "*");
-    if (request.method === "OPTIONS") {
-        response.writeHead(200);
-        response.end();
-        return true;
-    }
-    return false;
-};
-
-let server = http.createServer((request, response) => {
-    if (cors(request, response)) return;
-
-    switch (request.url) {
-        case "/users":
-            usersController(request, response);
-            break;
-        case "/lessons":
-            response.write("Tasks page");
-            response.end();
-            break;
-        default:
-            response.write("Page not found");
-            response.end();
-    }
+app.use((request, response) => {
+    response.sendStatus(404);
 });
 
-server.listen(3009);
+app.listen(3009, function() {
+    console.log("App is listening on port 3009");
+});
